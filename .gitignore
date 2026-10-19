@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Rust / Wasm
+/wasm/market-gen/target
+/src/wasm/market-gen

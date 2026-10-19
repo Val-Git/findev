@@ -25,7 +25,25 @@ jobs:
           node-version: 26
           cache: npm
 
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: wasm/market-gen
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+
       - run: npm ci
+
+      - name: Test Wasm
+        run: npm run test:wasm
+
+      - name: Build Wasm
+        run: npm run build:wasm
 
       - name: Format check
         run: npm run format:check
