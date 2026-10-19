@@ -27,6 +27,15 @@ jobs:
 
       - run: npm ci
 
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npx ng test --watch=false
+
       - name: Build
         run: npx ng build --base-href "/${{ github.event.repository.name }}/"
 
