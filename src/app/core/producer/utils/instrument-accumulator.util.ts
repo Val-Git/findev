@@ -5,7 +5,7 @@ import {
   BID_QUANTITY,
   PRICE_CENTS,
   TRADE_QUANTITY,
-} from '../market-update.const';
+} from '../consts/market-update.const';
 import type { MarketRow } from '../producer.type';
 
 /**

@@ -1,24 +1,14 @@
 import { errorMessage } from '@shared/utils/errors.util';
-import {
-  createAccumulator,
-  type InstrumentAccumulator,
-  recordUpdate,
-  toMarketRow,
-} from './utils/instrument-accumulator.util';
-import { instrumentSymbol } from './utils/instruments.util';
-import { FIELDS_PER_UPDATE, INSTRUMENT } from './market-update.const';
-import type { MarketRow, ProducerEvent, ProducerSettings, ProducerStatus } from './producer.type';
+import { recordUpdate } from './utils/instrument-accumulator.util';
+import { createInstruments, type Instrument, toMarketRows } from './utils/instruments.util';
+import { FIELDS_PER_UPDATE, INSTRUMENT } from './consts/market-update.const';
+import type { ProducerEvent, ProducerSettings, ProducerStatus } from './producer.type';
 import type { BatchGenerator, GeneratorFactory } from './utils/wasm-generator.util';
 
 export interface ProducerRunDeps {
   readonly createGenerator: GeneratorFactory;
   readonly createSeed: () => number;
   readonly post: (event: ProducerEvent) => void;
-}
-
-interface Instrument {
-  readonly symbol: string;
-  readonly totals: InstrumentAccumulator;
 }
 
 /**
@@ -49,13 +39,7 @@ export class ProducerRun {
     private readonly settings: ProducerSettings,
     private readonly deps: ProducerRunDeps,
   ) {
-    this.instruments = Array.from(
-      { length: settings.instrumentCount },
-      (_: unknown, index: number): Instrument => ({
-        symbol: instrumentSymbol(index),
-        totals: createAccumulator(),
-      }),
-    );
+    this.instruments = createInstruments(settings.instrumentCount);
   }
 
   /** Creates the run and starts loading its generator. */
@@ -192,13 +176,7 @@ export class ProducerRun {
   }
 
   private postSnapshot(): void {
-    this.deps.post({
-      type: 'snapshot',
-      runId: this.runId,
-      rows: this.instruments.map(({ symbol, totals }: Instrument): MarketRow =>
-        toMarketRow(symbol, totals),
-      ),
-    });
+    this.deps.post({ type: 'snapshot', runId: this.runId, rows: toMarketRows(this.instruments) });
   }
 
   private postStatus(status: ProducerStatus): void {

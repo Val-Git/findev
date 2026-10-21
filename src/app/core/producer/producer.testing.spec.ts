@@ -1,6 +1,6 @@
 import type { BatchGenerator } from './utils/wasm-generator.util';
 
-/** One update in the flat field order of `market-update.const.ts`. */
+/** One update in the flat field order of `consts/market-update.const.ts`. */
 export interface TestUpdate {
   readonly instrument: number;
   readonly priceCents: number;

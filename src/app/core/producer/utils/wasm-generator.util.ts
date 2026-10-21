@@ -1,6 +1,6 @@
 import initWasm, { fieldsPerUpdate, Generator } from '@wasm/market-gen/market_gen';
 import { errorMessage } from '@shared/utils/errors.util';
-import { FIELDS_PER_UPDATE } from '../market-update.const';
+import { FIELDS_PER_UPDATE } from '../consts/market-update.const';
 
 /** The part of the Wasm generator the engine depends on; tests substitute a fake. */
 export interface BatchGenerator {

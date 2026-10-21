@@ -4,7 +4,7 @@ import {
   recordUpdate,
   toMarketRow,
 } from './instrument-accumulator.util';
-import { FIELDS_PER_UPDATE } from '../market-update.const';
+import { FIELDS_PER_UPDATE } from '../consts/market-update.const';
 import { encodeBatch, type TestUpdate } from '../producer.testing.spec';
 
 function update(overrides: Partial<TestUpdate>): TestUpdate {

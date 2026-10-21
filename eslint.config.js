@@ -68,7 +68,11 @@ module.exports = defineConfig([
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
-      '@typescript-eslint/member-ordering': 'error',
+      // Group members by kind, not visibility: a public field may depend on a private one declared above it.
+      '@typescript-eslint/member-ordering': [
+        'error',
+        { default: ['signature', 'field', 'constructor', 'method'] },
+      ],
 
       // General
       eqeqeq: ['error', 'always'],
