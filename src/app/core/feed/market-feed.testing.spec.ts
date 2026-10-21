@@ -14,7 +14,16 @@ export class FakeProducerWorker implements ProducerWorker {
     this.posted.push(message as ProducerCommand);
   }
 
-  addEventListener(type: string, listener: EventListenerOrEventListenerObject): void {
+  /** Honours `signal` like a real worker: aborting it removes the listener. */
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: AddEventListenerOptions | boolean,
+  ): void {
+    const signal = typeof options === 'object' ? options.signal : undefined;
+    if (signal?.aborted) {
+      return;
+    }
     const callback: Listener =
       typeof listener === 'function'
         ? listener
@@ -22,6 +31,12 @@ export class FakeProducerWorker implements ProducerWorker {
             listener.handleEvent(event);
           };
     this.listeners.set(type, [...(this.listeners.get(type) ?? []), callback]);
+    signal?.addEventListener('abort', (): void => {
+      this.listeners.set(
+        type,
+        (this.listeners.get(type) ?? []).filter((l: Listener): boolean => l !== callback),
+      );
+    });
   }
 
   terminate(): void {
@@ -47,4 +62,16 @@ export class FakeProducerWorker implements ProducerWorker {
 
 export function provideFakeProducerWorker(worker: FakeProducerWorker): Provider {
   return { provide: PRODUCER_WORKER_FACTORY, useValue: (): ProducerWorker => worker };
+}
+
+/** Creates a new fake on every call and appends it to `created`, so tests can follow replacements. */
+export function provideFakeProducerWorkerFactory(created: FakeProducerWorker[]): Provider {
+  return {
+    provide: PRODUCER_WORKER_FACTORY,
+    useValue: (): ProducerWorker => {
+      const worker = new FakeProducerWorker();
+      created.push(worker);
+      return worker;
+    },
+  };
 }

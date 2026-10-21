@@ -13,10 +13,11 @@ import { PRODUCER_WORKER_FACTORY, type ProducerWorker } from './worker-factory.t
 
 const WORKER_FAILURE_MESSAGE = 'Failed to start generator worker';
 
-/**
- * The only owner of the producer worker.
- * Sends commands, drops events from replaced runs by `runId` and exposes the current run's state.
- */
+interface WorkerConnection {
+  readonly worker: ProducerWorker;
+  readonly listeners: AbortController;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MarketFeedService {
   private readonly settingsSubject = new BehaviorSubject<ProducerSettings>(
@@ -33,22 +34,14 @@ export class MarketFeedService {
   readonly rows$ = this.rowsSubject.asObservable();
   readonly error$ = this.errorSubject.asObservable();
 
-  private readonly worker: ProducerWorker = inject(PRODUCER_WORKER_FACTORY)();
+  private readonly createWorker = inject(PRODUCER_WORKER_FACTORY);
+  private connection: WorkerConnection | null = null;
   private runId = 0;
 
   constructor() {
-    this.worker.addEventListener('message', ({ data }: MessageEvent<ProducerEvent>): void => {
-      this.onEvent(data);
-    });
-    this.worker.addEventListener('error', (event: ErrorEvent): void => {
-      this.onWorkerFailure(event.message);
-    });
-    this.worker.addEventListener('messageerror', (): void => {
-      this.onWorkerFailure('');
-    });
     inject(DestroyRef).onDestroy((): void => {
       this.send({ type: 'stop' });
-      this.worker.terminate();
+      this.disconnect();
     });
 
     this.apply(DEFAULT_PRODUCER_SETTINGS);
@@ -61,15 +54,14 @@ export class MarketFeedService {
     this.rowsSubject.next(emptyRows(settings.instrumentCount));
     this.errorSubject.next(null);
     this.statusSubject.next('initializing');
-    this.send({ type: 'start', runId, settings });
+    // After a worker failure this creates a new worker, so Apply recovers the producer.
+    this.connect().postMessage({ type: 'start', runId, settings } satisfies ProducerCommand);
   }
 
-  /** The status changes once the worker confirms it. */
   pause(): void {
     this.send({ type: 'pause' });
   }
 
-  /** The status changes once the worker confirms it. */
   resume(): void {
     this.send({ type: 'resume' });
   }
@@ -92,14 +84,54 @@ export class MarketFeedService {
     }
   }
 
-  /** The worker script itself failed. Such errors belong to no run. */
+  /** The worker script itself failed. Such errors belong to no run; the failed worker is released. */
   private onWorkerFailure(message: string): void {
+    this.disconnect();
     this.errorSubject.next(message || WORKER_FAILURE_MESSAGE);
     this.statusSubject.next('error');
   }
 
+  /** Returns the live worker, creating one when there is none. */
+  private connect(): ProducerWorker {
+    if (this.connection) {
+      return this.connection.worker;
+    }
+    const worker = this.createWorker();
+    const listeners = new AbortController();
+    const options: AddEventListenerOptions = { signal: listeners.signal };
+    worker.addEventListener(
+      'message',
+      ({ data }: MessageEvent<ProducerEvent>): void => {
+        this.onEvent(data);
+      },
+      options,
+    );
+    worker.addEventListener(
+      'error',
+      (event: ErrorEvent): void => {
+        this.onWorkerFailure(event.message);
+      },
+      options,
+    );
+    worker.addEventListener(
+      'messageerror',
+      (): void => {
+        this.onWorkerFailure('');
+      },
+      options,
+    );
+    this.connection = { worker, listeners };
+    return worker;
+  }
+
+  private disconnect(): void {
+    this.connection?.listeners.abort();
+    this.connection?.worker.terminate();
+    this.connection = null;
+  }
+
   private send(command: ProducerCommand): void {
-    this.worker.postMessage(command);
+    this.connection?.worker.postMessage(command);
   }
 }
 

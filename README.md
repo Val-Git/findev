@@ -145,6 +145,8 @@ SettingsComponent ──┼─ MarketFeedService ──commands──▶ Produce
 
 - `MarketFeedService` is a root singleton created at startup and the only owner of the
   worker, so navigating between pages keeps the active run and creates no extra producers.
+- If the worker itself fails, the service removes its listeners and terminates it; the next
+  **Apply** starts the run in a new worker. Only one worker is alive at a time.
 - Each `start` carries a new `runId`, and every worker event carries the `runId` of the run
   that produced it. The service drops events from replaced runs, so a late result never
   overwrites the new run's state. `apply` clears the table immediately.

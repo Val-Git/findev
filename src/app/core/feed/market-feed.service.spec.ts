@@ -3,7 +3,10 @@ import { type Observable, take } from 'rxjs';
 import { DEFAULT_PRODUCER_SETTINGS } from '@core/producer/consts/producer-settings.const';
 import type { MarketRow, ProducerSettings } from '@core/producer/producer.type';
 import { MarketFeedService } from './market-feed.service';
-import { FakeProducerWorker, provideFakeProducerWorker } from './market-feed.testing.spec';
+import {
+  type FakeProducerWorker,
+  provideFakeProducerWorkerFactory,
+} from './market-feed.testing.spec';
 
 const NEW_SETTINGS: ProducerSettings = {
   instrumentCount: 2,
@@ -46,13 +49,25 @@ function current<T>(source: Observable<T>): T {
 }
 
 describe('MarketFeedService', (): void => {
+  /** Every worker the service created, in order. */
+  let workers: FakeProducerWorker[];
+  /** The first worker, created when the service starts. */
   let worker: FakeProducerWorker;
   let feed: MarketFeedService;
 
+  function workerAt(index: number): FakeProducerWorker {
+    const created = workers[index];
+    if (!created) {
+      throw new Error(`Worker ${String(index)} was not created`);
+    }
+    return created;
+  }
+
   beforeEach((): void => {
-    worker = new FakeProducerWorker();
-    TestBed.configureTestingModule({ providers: [provideFakeProducerWorker(worker)] });
+    workers = [];
+    TestBed.configureTestingModule({ providers: [provideFakeProducerWorkerFactory(workers)] });
     feed = TestBed.inject(MarketFeedService);
+    worker = workerAt(0);
   });
 
   it('starts the first run with the default settings', (): void => {
@@ -154,6 +169,57 @@ describe('MarketFeedService', (): void => {
     worker.fail('');
 
     expect(current(feed.error$)).toBe('Failed to start generator worker');
+  });
+
+  it('keeps a single worker across runs', (): void => {
+    feed.apply(NEW_SETTINGS);
+    feed.apply(DEFAULT_PRODUCER_SETTINGS);
+
+    expect(workers).toHaveLength(1);
+    expect(worker.terminated).toBe(false);
+  });
+
+  it('terminates a failed worker and starts the next run in a new one', (): void => {
+    worker.fail('Script error');
+    expect(worker.terminated).toBe(true);
+
+    feed.apply(NEW_SETTINGS);
+
+    expect(workers).toHaveLength(2);
+    expect(workerAt(1).posted).toEqual([{ type: 'start', runId: 2, settings: NEW_SETTINGS }]);
+    expect(worker.posted).toEqual([
+      { type: 'start', runId: 1, settings: DEFAULT_PRODUCER_SETTINGS },
+    ]);
+    expect(current(feed.status$)).toBe('initializing');
+    expect(current(feed.error$)).toBeNull();
+
+    workerAt(1).emit({ type: 'status', runId: 2, status: 'running' });
+    expect(current(feed.status$)).toBe('running');
+  });
+
+  it('ignores events from a failed worker', (): void => {
+    worker.fail('Script error');
+    feed.apply(NEW_SETTINGS);
+
+    worker.emit({ type: 'snapshot', runId: 2, rows: [tradedRow('ALFA')] });
+    worker.fail('late failure');
+
+    expect(current(feed.rows$)).toEqual([emptyRow('ALFA'), emptyRow('BETA')]);
+    expect(current(feed.status$)).toBe('initializing');
+    expect(current(feed.error$)).toBeNull();
+    expect(workerAt(1).terminated).toBe(false);
+  });
+
+  it('does not create a worker for pause or resume after a failure', (): void => {
+    worker.fail('Script error');
+
+    feed.pause();
+    feed.resume();
+
+    expect(workers).toHaveLength(1);
+    expect(worker.posted).toEqual([
+      { type: 'start', runId: 1, settings: DEFAULT_PRODUCER_SETTINGS },
+    ]);
   });
 
   it('stops and terminates the worker when destroyed', (): void => {
