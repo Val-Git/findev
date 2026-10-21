@@ -1,0 +1,47 @@
+<section class="settings">
+  <h1>Producer settings</h1>
+
+  <form [formRoot]="formService.form">
+    @for (field of fields; track field.key) {
+      @let state = formService.form[field.key]();
+      @let error = state.touched() && state.invalid() ? state.errors()[0]?.message : undefined;
+      <div class="field">
+        <label [for]="field.key">{{ field.label }}</label>
+        <input
+          type="number"
+          inputmode="numeric"
+          step="1"
+          [id]="field.key"
+          [attr.aria-invalid]="error !== undefined"
+          [attr.aria-describedby]="field.key + '-hint'"
+          [formField]="formService.form[field.key]"
+        />
+        <p class="hint" [id]="field.key + '-hint'">
+          {{ field.hint }} {{ field.min | number }}–{{ field.max | number }}.
+        </p>
+        @if (error) {
+          <p class="error" role="alert">{{ error }}</p>
+        }
+      </div>
+    }
+
+    <p class="rate">
+      @let rate = formService.nominalRate();
+      @if (rate !== null) {
+        Nominal rate: {{ rate | number: '1.0-1' }} updates per second across all instruments.
+      } @else {
+        Nominal rate: —
+      }
+    </p>
+
+    <div class="actions">
+      <button type="submit" [disabled]="formService.form().submitting()">Apply</button>
+      <button type="button" class="secondary" (click)="formService.restoreDefaults()">
+        Restore defaults
+      </button>
+      @if (formService.applied()) {
+        <span class="applied" role="status">Applied. A new run has started.</span>
+      }
+    </div>
+  </form>
+</section>

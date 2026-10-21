@@ -1,0 +1,64 @@
+h1 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 28rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    font-weight: 600;
+  }
+
+  input {
+    padding: 0.375rem 0.5rem;
+    border: 1px solid #bdbdbd;
+    border-radius: 0.375rem;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+
+    &[aria-invalid='true'] {
+      border-color: #c62828;
+    }
+  }
+}
+
+.hint,
+.rate {
+  margin: 0;
+  color: #616161;
+  font-size: 0.875rem;
+}
+
+.error {
+  margin: 0;
+  color: #c62828;
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.secondary {
+  border-color: #1565c0;
+  background: #fff;
+  color: #1565c0;
+}
+
+.applied {
+  color: #2e7d32;
+  font-size: 0.875rem;
+}
