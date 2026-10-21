@@ -1,0 +1,56 @@
+@let rows = (rows$ | async) ?? [];
+@let status = (status$ | async) ?? 'initializing';
+@let error = error$ | async;
+
+<section class="dashboard">
+  <header class="toolbar">
+    <h1>Market</h1>
+    <span class="status" [attr.data-status]="status">{{ status }}</span>
+    @switch (status) {
+      @case ('running') {
+        <button type="button" (click)="pause()">Pause</button>
+      }
+      @case ('paused') {
+        <button type="button" (click)="resume()">Resume</button>
+      }
+      @default {
+        <button type="button" disabled>Pause</button>
+      }
+    }
+  </header>
+
+  @if (error) {
+    <p class="error" role="alert">{{ error }}</p>
+  }
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Instrument</th>
+          <th scope="col" class="num">Last price</th>
+          <th scope="col" class="num">Spread</th>
+          <th scope="col" class="num">Volume</th>
+          <th scope="col" class="num">VWAP</th>
+          <th scope="col" class="num">Imbalance</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.symbol) {
+          <tr>
+            <th scope="row">{{ row.symbol }}</th>
+            <td class="num">{{ row.lastPriceCents | centsCurrency }}</td>
+            <td class="num">{{ row.spreadCents | centsCurrency }}</td>
+            <td class="num">{{ row.volume | number: '1.0-0' }}</td>
+            <td class="num">{{ row.vwapCents | centsCurrency }}</td>
+            <td class="num">{{ row.imbalance | imbalance }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty">No instruments</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

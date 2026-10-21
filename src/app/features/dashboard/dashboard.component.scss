@@ -1,0 +1,74 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0 auto 0 0;
+    font-size: 1.5rem;
+  }
+}
+
+.status {
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  background: var(--status-bg, #eceff1);
+  color: var(--status-fg, #455a64);
+  font-size: 0.875rem;
+  text-transform: capitalize;
+
+  &[data-status='running'] {
+    --status-bg: #e8f5e9;
+    --status-fg: #2e7d32;
+  }
+
+  &[data-status='paused'] {
+    --status-bg: #fff8e1;
+    --status-fg: #8d6e00;
+  }
+
+  &[data-status='error'] {
+    --status-bg: #ffebee;
+    --status-fg: #c62828;
+  }
+}
+
+.error {
+  margin: 0 0 1rem;
+  color: #c62828;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+thead th {
+  color: #616161;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.num {
+  text-align: right;
+}
+
+.empty {
+  color: #757575;
+  text-align: center;
+}

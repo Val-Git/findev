@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.brand {
+  font-weight: 700;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+
+  a {
+    color: #455a64;
+    text-decoration: none;
+
+    &.active {
+      color: #1565c0;
+      font-weight: 600;
+    }
+  }
+}
+
+.app-main {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
