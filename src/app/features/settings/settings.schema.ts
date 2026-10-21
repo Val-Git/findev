@@ -29,7 +29,7 @@ export const settingsSchema = schema<SettingsDraft>((path: SchemaPathTree<Settin
   wholeNumberInRange(path.batchIntervalMs, PRODUCER_SETTINGS_LIMITS.batchIntervalMs);
 });
 
-/** True when no value in the draft is empty. Checks every field, so new settings need no change here. */
+/** True when no value in the draft is empty. */
 export function isComplete(draft: SettingsDraft): draft is ProducerSettings {
   return Object.values(draft).every((value: number | null): boolean => value !== null);
 }

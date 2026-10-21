@@ -5,11 +5,11 @@
  */
 
 export interface ProducerSettings {
-  /** Number of fictional instruments, 1–50 */
+  /** Number of fictional instruments, 1-50 */
   readonly instrumentCount: number;
-  /** Total market updates per batch across all instruments, 1–1000 */
+  /** Total market updates per batch across all instruments, 1-1000 */
   readonly updatesPerBatch: number;
-  /** Requested time between batches in milliseconds, 50–2000 */
+  /** Requested time between batches in milliseconds, 50-2000 */
   readonly batchIntervalMs: number;
 }
 
@@ -22,9 +22,8 @@ export interface MarketRow {
   readonly spreadCents: number | null;
   /** Sum of trade quantities since the run started. */
   readonly volume: number;
-  /** Not rounded: cents are rounded only for display. */
   readonly vwapCents: number | null;
-  /** Between −1 and +1. */
+  /** Between -1 and +1. */
   readonly imbalance: number | null;
 }
 

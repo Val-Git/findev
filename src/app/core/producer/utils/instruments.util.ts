@@ -37,7 +37,7 @@ export interface Instrument {
   readonly totals: InstrumentAccumulator;
 }
 
-/** Unique ticker for an instrument index: `ALFA`, `BETA`, …, then `ALFA2`, `BETA2`, … */
+/** Unique ticker for an instrument index: `ALFA`, `BETA`, `GAMA`, etc. */
 export function instrumentSymbol(index: number): string {
   const base = BASE_SYMBOLS[index % BASE_SYMBOLS.length] ?? 'INST';
   const round = Math.floor(index / BASE_SYMBOLS.length);
@@ -46,7 +46,7 @@ export function instrumentSymbol(index: number): string {
 
 /** Instruments of a fresh run: symbols by index and empty totals. */
 export function createInstruments(count: number): Instrument[] {
-  return Array.from({ length: count }, (_: unknown, index: number): Instrument => ({
+  return Array.from({ length: count }, (_, index: number): Instrument => ({
     symbol: instrumentSymbol(index),
     totals: createAccumulator(),
   }));

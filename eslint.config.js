@@ -29,8 +29,8 @@ module.exports = defineConfig([
       '@typescript-eslint/explicit-function-return-type': [
         'error',
         {
-          allowExpressions: false,
-          allowTypedFunctionExpressions: false,
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true,
           allowHigherOrderFunctions: false,
           allowDirectConstAssertionInArrowFunctions: false,
           allowConciseArrowFunctionExpressionsStartingWithVoid: false,
@@ -38,16 +38,6 @@ module.exports = defineConfig([
         },
       ],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
-      '@typescript-eslint/typedef': [
-        'error',
-        {
-          parameter: true,
-          arrowParameter: true,
-          propertyDeclaration: false,
-          memberVariableDeclaration: false,
-          variableDeclaration: false,
-        },
-      ],
 
       // TypeScript
       '@typescript-eslint/no-explicit-any': 'error',

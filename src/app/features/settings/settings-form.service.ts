@@ -35,7 +35,7 @@ export class SettingsFormService {
     computation: (): boolean => false,
   });
 
-  /** Updates per second across all instruments for the draftSettings, or `null` while it is invalid. */
+  /** Updates per second across all instruments for the draft, or `null` while it is invalid. */
   readonly nominalRate = computed((): number | null => {
     const draft = this.draftSettings();
     return this.form().valid() && isComplete(draft)
@@ -43,7 +43,7 @@ export class SettingsFormService {
       : null;
   });
 
-  /** Fills the draftSettings with the defaults without applying them. */
+  /** Fills the draft with the defaults without applying them. */
   restoreDefaults(): void {
     this.draftSettings.set({ ...DEFAULT_PRODUCER_SETTINGS });
   }

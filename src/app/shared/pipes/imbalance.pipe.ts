@@ -7,7 +7,7 @@ const SIGNED_RATIO = new Intl.NumberFormat('en-US', {
   signDisplay: 'exceptZero',
 });
 
-/** Formats an order-book imbalance between −1 and +1 with an explicit sign. */
+/** Formats an order-book imbalance between -1 and +1 with an explicit sign. */
 @Pipe({ name: 'imbalance' })
 export class ImbalancePipe implements PipeTransform {
   transform(imbalance: number | null): string {

@@ -36,7 +36,7 @@ export function createAccumulator(): InstrumentAccumulator {
   };
 }
 
-/** Applies the update that starts at `offset` in a flat batch. Each trade must be applied once. */
+/** Applies the update that starts at `offset` in a flat batch. */
 export function recordUpdate(acc: InstrumentAccumulator, batch: Int32Array, offset: number): void {
   const price = field(batch, offset + PRICE_CENTS);
   const quantity = field(batch, offset + TRADE_QUANTITY);
