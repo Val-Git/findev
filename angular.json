@@ -29,6 +29,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "market_gen_bg.wasm",
+                "input": "src/wasm/market-gen",
+                "output": "wasm"
               }
             ],
             "styles": ["src/styles.scss"]

@@ -28,6 +28,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -38,6 +39,9 @@ jobs:
           tool: wasm-pack
 
       - run: npm ci
+
+      - name: Lint Wasm
+        run: npm run lint:wasm
 
       - name: Test Wasm
         run: npm run test:wasm
