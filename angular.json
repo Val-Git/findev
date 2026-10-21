@@ -36,7 +36,8 @@
                 "output": "wasm"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": ["src/styles.scss"],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
             "production": {
@@ -75,7 +76,10 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "exclude": ["**/*.testing.spec.ts"]
+          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
